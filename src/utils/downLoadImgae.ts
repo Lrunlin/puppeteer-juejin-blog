@@ -6,7 +6,7 @@ import fs from "fs";
 
 /** 根据文件路径返回对应的buffer*/
 async function download(url: string) {
-  await sleep(1898);
+  await sleep(2198);
   return axios
     .get(url, {
       responseType: "arraybuffer", // 特别注意，需要加上此参数

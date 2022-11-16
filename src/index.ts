@@ -6,13 +6,11 @@ import save from "./utils/save";
 import config from "./config";
 import sleep from "./utils/sleep";
 
-
 const fa = console.log;
 console.log = function () {
   let time = new Date();
   fa(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}  `, ...arguments);
 };
-
 
 axios.defaults.baseURL = config.apiHost;
 axios.interceptors.request.use(c => {
@@ -61,9 +59,10 @@ async function start() {
       if (errCount > 20) process.exit(1);
       continue;
     }
+    await sleep(300_000);
   }
   console.log("爬取任务结束,开始新的一轮");
-  await sleep(95465);
+  await sleep(600_000);
   await start();
 }
 start();

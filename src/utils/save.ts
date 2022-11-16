@@ -12,6 +12,7 @@ import allowSetCover from "./allowSetCover";
 import changeLinkHref from "./changeLinkHref";
 import removeJuejinTitle from "./removeJuejinTitle";
 import { setCount } from "../modules/count";
+import { Page } from "puppeteer";
 
 let tagListawait = [] as { id: number; name: string }[];
 mysql.query(`select id,name from tag;`).then(([rows]) => {
@@ -22,16 +23,7 @@ async function save(url: string) {
   console.log(`开始:${url} 的抓取`);
   let browser = await Browser();
   // 如果有掘金文章页面，就不在创建
-  let page =
-    (await (await browser.pages()).find(item => item.url().startsWith("https://juejin.cn/post"))) ||
-    (await browser
-      .newPage()
-      .then(r => r)
-      .catch(() => false as false));
-
-  if (!page) {
-    return;
-  }
+  let page = await browser.newPage();
 
   let status = await page
     .goto(url, { timeout: 0 })
@@ -39,11 +31,34 @@ async function save(url: string) {
     .catch(() => false as false);
 
   if (!status) {
+    await page.close();
     return;
   }
 
-  await sleep(5678);
   await page.waitForSelector("main");
+  await sleep(2678);
+
+  //滚动到底部
+  await page.evaluate(() => {
+    return new Promise((resolve, reject) => {
+      let _height = -1;
+      let timer = setInterval(() => {
+        let height = document.documentElement.scrollTop || document.body.scrollTop;
+        console.log(height, _height);
+        if (height == _height) {
+          clearInterval(timer);
+          resolve("");
+        }
+        _height = height;
+        (document.getElementById("comment-box") as HTMLDivElement).scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 600);
+    });
+  });
+
+  await sleep(1678);
+
   console.log("判断标签");
   //判断标签数
   let _tags = await (
@@ -60,10 +75,13 @@ async function save(url: string) {
       );
     })
     .filter(item => item);
+
   if (!_tags.length) {
     console.log(`tag数量为0，不保存`);
+    await page.close();
     return;
   }
+
   let $ = load(await page.content());
   let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
 
@@ -102,6 +120,7 @@ async function save(url: string) {
     })
     .finally(async () => {
       console.log(`结束:${url} 的抓取`);
+      await (page as Page).close();
     });
 }
 export default save;
