@@ -31,33 +31,14 @@ async function save(url: string) {
     .catch(() => false as false);
 
   if (!status) {
+    console.log(`响应了错误的Http状态码，等待2分钟`);
+    await sleep(120_000);
     await page.close();
     return;
   }
 
   await page.waitForSelector("main");
   await sleep(2678);
-
-  //滚动到底部
-  await page.evaluate(() => {
-    return new Promise((resolve, reject) => {
-      let _height = -1;
-      let timer = setInterval(() => {
-        let height = document.documentElement.scrollTop || document.body.scrollTop;
-        console.log(height, _height);
-        if (height == _height) {
-          clearInterval(timer);
-          resolve("");
-        }
-        _height = height;
-        (document.getElementById("comment-box") as HTMLDivElement).scrollIntoView({
-          behavior: "smooth",
-        });
-      }, 600);
-    });
-  });
-
-  await sleep(1678);
 
   console.log("判断标签");
   //判断标签数
@@ -82,6 +63,29 @@ async function save(url: string) {
     return;
   }
 
+  //滚动到底部
+  await page.evaluate(() => {
+    return new Promise((resolve, reject) => {
+      let _height = -1;
+      let timer = setInterval(() => {
+        let height = document.documentElement.scrollTop || document.body.scrollTop;
+        console.log(height, _height);
+        if (height == _height) {
+          clearInterval(timer);
+          resolve("");
+        }
+        _height = height;
+        (document.getElementById("comment-box") as HTMLDivElement).scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 600);
+    });
+  });
+
+  await sleep(1678);
+
+
+  //开始处理数据
   let $ = load(await page.content());
   let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
 
