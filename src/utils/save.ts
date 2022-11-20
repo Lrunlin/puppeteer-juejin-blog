@@ -26,20 +26,20 @@ async function save(url: string) {
   let page = await browser.newPage();
 
   let status = await page
-    .goto(url, { timeout: 0 })
+    .goto(url, { timeout: 0, referer: `https://juejin.cn/` })
     .then(r => (r?.status() == 200 ? r : (false as false)))
     .catch(() => false as false);
 
   if (!status) {
+    await page.close();
     console.log(`响应了错误的Http状态码，等待2分钟`);
     await sleep(120_000);
-    await page.close();
     return;
   }
 
   await page.waitForSelector("main");
-  await sleep(2678);
-
+  await page.waitForSelector(".tag-list-box");
+  await sleep(200);
   console.log("判断标签");
   //判断标签数
   let _tags = await (
@@ -59,9 +59,21 @@ async function save(url: string) {
 
   if (!_tags.length) {
     console.log(`tag数量为0，不保存`);
+    await sleep(1200);
     await page.close();
     return;
   }
+  let $ = load(await page.content());
+
+  //判断文中是否有掘金二字，如果有则不保存
+  if ($(".markdown-body").text().includes("掘金")) {
+    console.log(`包含掘金二字，不保存`);
+    await sleep(1200);
+    await page.close();
+    return;
+  }
+
+  await sleep(2678);
 
   //滚动到底部
   await page.evaluate(() => {
@@ -69,7 +81,6 @@ async function save(url: string) {
       let _height = -1;
       let timer = setInterval(() => {
         let height = document.documentElement.scrollTop || document.body.scrollTop;
-        console.log(height, _height);
         if (height == _height) {
           clearInterval(timer);
           resolve("");
@@ -84,9 +95,7 @@ async function save(url: string) {
 
   await sleep(1678);
 
-
   //开始处理数据
-  let $ = load(await page.content());
   let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
 
   let coverSrc = $(".article-hero").attr("src");
@@ -125,6 +134,7 @@ async function save(url: string) {
     .finally(async () => {
       console.log(`结束:${url} 的抓取`);
       await (page as Page).close();
+      await sleep(1200);
     });
 }
 export default save;

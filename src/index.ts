@@ -32,7 +32,10 @@ async function start() {
     try {
       let indexPage = await browser.newPage();
       // 跳转值tag对应的页面
-      await indexPage.goto(tagHref?.href, { timeout: 0 });
+      await indexPage.goto(tagHref?.href, {
+        timeout: 0,
+        referer: Math.random() > 0.5 ? "https://google.com/" : "https://baidu.com/",
+      });
 
       console.log(`打开浏览器跳转Tag(${tagHref.text})`);
 
