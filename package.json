@@ -4,13 +4,14 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": " nodemon --watch ./src -e ts --exec ts-node ./src/index.ts",
-    "start": "tsc&&node dist/src/index.js"
+    "dev": "cross-env ENV=development nodemon --watch ./src -e ts --exec ts-node ./src/index.ts",
+    "start": "tsc&&cross-env ENV=production node dist/src/index.js"
   },
   "dependencies": {
     "@types/mime": "^3.0.1",
     "axios": "^0.27.2",
     "cheerio": "^1.0.0-rc.10",
+    "cross-env": "^7.0.3",
     "form-data": "^4.0.0",
     "mime": "^3.0.0",
     "mysql2": "^2.3.3",

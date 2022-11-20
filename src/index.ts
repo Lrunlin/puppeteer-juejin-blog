@@ -58,6 +58,8 @@ async function start() {
       }
       console.log(`${tagHref.text} 结束`);
     } catch (error) {
+      console.log(error);
+      
       errCount++;
       if (errCount > 20) process.exit(1);
       continue;
