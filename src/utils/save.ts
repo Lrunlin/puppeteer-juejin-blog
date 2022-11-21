@@ -13,6 +13,7 @@ import changeLinkHref from "./changeLinkHref";
 import removeJuejinTitle from "./removeJuejinTitle";
 import { setCount } from "../modules/count";
 import { Page } from "puppeteer";
+import config from "../config";
 
 let tagListawait = [] as { id: number; name: string }[];
 mysql.query(`select id,name from tag;`).then(([rows]) => {
@@ -59,19 +60,12 @@ async function save(url: string) {
 
   if (!_tags.length) {
     console.log(`tag数量为0，不保存`);
-    await sleep(1200);
+    await sleep(1000);
     await page.close();
+    await sleep(200);
     return;
   }
   let $ = load(await page.content());
-
-  //判断文中是否有掘金二字，如果有则不保存
-  if ($(".markdown-body").text().includes("掘金")) {
-    console.log(`包含掘金二字，不保存`);
-    await sleep(1200);
-    await page.close();
-    return;
-  }
 
   await sleep(2678);
 
@@ -99,11 +93,11 @@ async function save(url: string) {
   let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
 
   let coverSrc = $(".article-hero").attr("src");
-  let content = await switchImagePath(
-    removeJuejinTitle(
-      changeLinkHref(language($(".markdown-body").remove("style").html() as string))
-    )
-  );
+  let content = $(".markdown-body").remove("style").html() as string;
+  content = await switchImagePath(changeLinkHref(language(content)));
+  if (config.removeJueJinKeyWord) {
+    content = removeJuejinTitle(content);
+  }
 
   let description = $("meta[name=description]").attr("content")?.substring(0, 190) || null;
   let cover = coverSrc

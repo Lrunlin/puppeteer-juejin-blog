@@ -12,4 +12,6 @@ export default {
   },
   /** 部署的服务端端口*/
   apiHost: "http://localhost:3000",
+  /** 是否移除文中出现关键词“掘金”，true会删除包含掘金的DOM*/
+  removeJueJinKeyWord:true
 };

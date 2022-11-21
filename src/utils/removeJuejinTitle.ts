@@ -1,12 +1,13 @@
 import { load } from "cheerio";
 
-/** 删除部分文章开头的掘金XXX计划标题*/
-function setCodeBarLanguage(content: string) {
+/** 删除包含掘金二字的元素*/
+function removeJueJinKeyWord(content: string) {
   let $ = load(content);
-  let text = $(".markdown-body p").first().text();
-  if (text.includes("掘金") || text.includes("计划") || text.includes("参加")) {
-    $(".markdown-body p").first().remove();
-  }
+  $("body>*").each((i, el) => {
+    if ($(el).text().includes("掘金")) {
+      $(el).remove();
+    }
+  });
   return $("body").html() + "";
 }
-export default setCodeBarLanguage;
+export default removeJueJinKeyWord;
