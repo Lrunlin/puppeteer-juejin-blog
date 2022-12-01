@@ -95,11 +95,12 @@ async function save(url: string) {
   let coverSrc = $(".article-hero").attr("src");
   let content = $(".markdown-body").remove("style").html() as string;
   content = await switchImagePath(changeLinkHref(language(content)));
+  let description = $("meta[name=description]").attr("content")?.substring(0, 190) || null;
   if (config.removeJueJinKeyWord) {
     content = removeJuejinTitle(content);
+    if (description && description.includes("掘金")) description = null;
   }
 
-  let description = $("meta[name=description]").attr("content")?.substring(0, 190) || null;
   let cover = coverSrc
     ? await uploadImage(allowSetCover(await downLoadImgae(coverSrc)), "cover")
     : null;
