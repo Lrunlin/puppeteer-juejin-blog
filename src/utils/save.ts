@@ -59,13 +59,20 @@ async function save(url: string) {
     .filter(item => item);
 
   if (!_tags.length) {
-    console.log(`tag数量为0，不保存`);
     await sleep(1000);
     await page.close();
     await sleep(200);
     return;
   }
+
   let $ = load(await page.content());
+  let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
+  if (config.removeJueJinKeyWord && title.includes("掘金")) {
+    await sleep(1000);
+    await page.close();
+    await sleep(200);
+    return;
+  }
 
   await sleep(2678);
 
@@ -90,7 +97,6 @@ async function save(url: string) {
   await sleep(1678);
 
   //开始处理数据
-  let title = $("title").eq(0).text().replace(/\n/g, "").replace(" - 掘金", "").substring(0, 190);
 
   let coverSrc = $(".article-hero").attr("src");
   let content = $(".markdown-body").remove("style").html() as string;
