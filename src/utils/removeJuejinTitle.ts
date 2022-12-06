@@ -4,7 +4,12 @@ import { load } from "cheerio";
 function removeJueJinKeyWord(content: string) {
   let $ = load(content);
   $("body>*").each((i, el) => {
-    if ($(el).text().includes("掘金")) {
+    if (
+      $(el).text().includes("掘金") ||
+      $(el).text().includes("本文正在参加") ||
+      $(el).text().includes("文章正在参加")||
+      $(el).text().includes("本文为稀土掘金技术社区")
+    ) {
       $(el).remove();
     }
   });
